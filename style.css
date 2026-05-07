@@ -1,0 +1,93 @@
+/* ตั้งค่าพื้นฐาน */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f7f6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.container {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 400px;
+    text-align: center;
+}
+
+h2 {
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 1.5rem;
+}
+
+#my-id {
+    color: #007bff;
+    word-break: break-all;
+}
+
+/* ส่วน Input และ Button */
+input[type="text"], textarea {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background 0.3s;
+}
+
+button:hover {
+    background-color: #218838;
+}
+
+hr {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+
+/* สถานะการเชื่อมต่อ */
+#status {
+    font-size: 0.9rem;
+    font-weight: bold;
+    margin-top: 10px;
+    color: #666;
+}
+
+/* รายการข้อความ */
+#messages {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    text-align: left;
+    border-top: 1px solid #f0f0f0;
+}
+
+#messages li {
+    padding: 8px;
+    border-bottom: 1px solid #f9f9f9;
+    font-size: 0.9rem;
+}
+
+#messages li a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>P2P Share</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h2>Your ID: <span id="my-id">...</span></h2>
+        
+        <input type="text" id="peer-id" placeholder="Enter Peer ID">
+        <button onclick="connectToPeer()">Connect</button>
+
+        <hr>
+
+        <div id="chat-box">
+            <textarea id="message-input" placeholder="Type message..."></textarea>
+            <button onclick="sendMessage()">Send Text</button>
+            <br><br>
+            <input type="file" id="file-input">
+            <button onclick="sendFile()">Send File</button>
+        </div>
+
+        <div id="status">Status: Idle</div>
+        <ul id="messages"></ul>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
