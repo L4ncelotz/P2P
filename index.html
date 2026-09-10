@@ -2,30 +2,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>P2P Share</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary Meta Tags -->
+    <title>p2p.share — Direct Browser-to-Browser Transfer</title>
+    <meta name="title" content="p2p.share — Direct Browser-to-Browser Transfer">
+    <meta name="description" content="Encrypted, serverless peer-to-peer file and message delivery directly between devices using WebRTC. No size limits, no middleman storage.">
+    <meta name="theme-color" content="#f7f7f4">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://p2p.share/">
+    <meta property="og:title" content="p2p.share — Direct P2P Transfer">
+    <meta property="og:description" content="Send files directly device-to-device. Fast, private, and serverless via WebRTC.">
+    <meta property="og:image" content="https://p2p.share/og-preview.png">
+
+    <!-- Twitter Card -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="p2p.share — Direct P2P Transfer">
+    <meta property="twitter:description" content="Send files directly device-to-device via WebRTC DataChannel.">
+    <meta property="twitter:image" content="https://p2p.share/og-preview.png">
+
+    <!-- Dynamic Status Favicon -->
+    <link id="dynamic-favicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='40' fill='%23807d72'/></svg>">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+
     <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h2>Your ID: <span id="my-id">...</span></h2>
-        
-        <input type="text" id="peer-id" placeholder="Enter Peer ID">
-        <button onclick="connectToPeer()">Connect</button>
+    <div class="workspace">
+        <!-- Top Navigation -->
+        <header class="top-nav">
+            <div class="brand">
+                <span class="brand-name">p2p.share</span>
+                <span id="status-pill" class="timeline-pill pill-thinking">Initializing</span>
+            </div>
+            <div class="peer-badge">
+                <span class="label">Your ID:</span>
+                <code id="my-id">generating...</code>
+                <button id="copy-btn" class="btn-hairline" onclick="copyId()" disabled>Copy ID</button>
+                <button id="share-link-btn" class="btn-hairline" onclick="copyShareLink()" disabled>Copy Link</button>
+                <button id="qr-btn" class="btn-hairline" onclick="toggleQrModal(true)" disabled>QR</button>
+                <button id="log-toggle-btn" class="btn-hairline" onclick="toggleLogDrawer()">Logs</button>
+            </div>
+        </header>
 
-        <hr>
+        <!-- Main Card Interface -->
+        <main class="main-card">
+            <!-- Connection Control Panel -->
+            <section class="connect-panel">
+                <input type="text" id="target-id" class="input-text" placeholder="Paste peer ID (e.g. p2p-8k2f1)">
+                <button id="connect-btn" class="btn-primary" onclick="initiateConnection()">Connect</button>
+            </section>
 
-        <div id="chat-box">
-            <textarea id="message-input" placeholder="Type message..."></textarea>
-            <button onclick="sendMessage()">Send Text</button>
-            <br><br>
-            <input type="file" id="file-input">
-            <button onclick="sendFile()">Send File</button>
-        </div>
+            <!-- Workspace Feed & Drop Container -->
+            <section id="drop-zone" class="feed-container">
+                <div id="feed" class="feed">
+                    <div class="system-notice">Ready for connection. Paste image (Ctrl+V), drop files, or send messages below.</div>
+                </div>
+                <div id="drop-overlay" class="drop-overlay">Drop files to initiate peer transfer</div>
+            </section>
 
-        <div id="status">Status: Idle</div>
-        <ul id="messages"></ul>
+            <!-- Realtime Metrics & Transfer Tray -->
+            <div id="transfer-tray" class="transfer-tray hidden">
+                <div class="tray-header">
+                    <span id="transfer-filename" class="code-text truncate">filename.bin</span>
+                    <span id="transfer-metrics" class="code-text metrics-text">0.0 MB / 0.0 MB · 0 KB/s · --:--</span>
+                </div>
+                <div class="progress-track">
+                    <div id="progress-bar" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- Composer Footer -->
+            <footer class="composer">
+                <input type="text" id="message-input" class="input-text" placeholder="Type a message (Enter to send)..." disabled>
+                <label class="btn-hairline file-select-label" title="Select files to send">
+                    <span>Attach</span>
+                    <input type="file" id="file-input" multiple onchange="handleFileSelect(event)" disabled>
+                </label>
+                <button id="send-btn" class="btn-primary" onclick="sendTextMessage()" disabled>Send</button>
+            </footer>
+
+            <!-- Diagnostic Log Drawer -->
+            <section id="log-drawer" class="log-drawer hidden">
+                <div class="log-header">
+                    <span class="code-text">WebRTC Diagnostic Console</span>
+                    <button class="btn-close" onclick="toggleLogDrawer(false)"><kbd>Esc</kbd></button>
+                </div>
+                <div id="debug-log" class="log-content"></div>
+            </section>
+        </main>
     </div>
+
+    <!-- Mobile Connection Modal -->
+    <div id="qr-modal" class="modal-backdrop hidden" onclick="handleBackdropClick(event)">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Scan to Connect</h3>
+                <button class="btn-close" onclick="toggleQrModal(false)"><kbd>Esc</kbd></button>
+            </div>
+            <div id="qrcode" class="qr-container"></div>
+            <p class="modal-desc">Scan with your phone's camera to join session directly without manually typing the ID.</p>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
